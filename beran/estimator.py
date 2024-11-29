@@ -43,13 +43,15 @@ class BeranEstimator:
         n = len(self.times)
         survival_function = np.zeros(n)
 
+        weights = [self.kernel.call(target_covariate, self.covariates[j]) for j in range(n)]
+
         for i in range(n):
             # Find individuals still at risk at time t_i
             at_risk = self.times >= self.times[i]
             
             # Compute kernel weights based on covariates
-            #kernel_weights = np.array([multivariate_kernel(target_covariate, covariates[j], bandwidth) for j in range(n)])
-            kernel_weights = [self.kernel.call(target_covariate, self.covariates[j]) for j in range(n)]
+            #kernel_weights = [self.kernel.call(target_covariate, self.covariates[j]) for j in range(n)]
+            kernel_weights = [weights[j] for j in range(n)]
             
             # Sum of kernel weights for individuals still at risk
             weighted_sum_at_risk = np.sum(kernel_weights * at_risk)
