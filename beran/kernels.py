@@ -1,4 +1,5 @@
 from scipy.stats import norm
+from pl_nn import PlNearestNeighbors
 
 class GaussianKernel:
     def __init__(self, h):
@@ -78,15 +79,73 @@ class GaussianKernel:
 class PlKnnKernel:
     def __init__(self):
         pass
+
+    def get_nn_weights(self, x, xi, y):
+        """
+        Recover the weights of the nearest neighbors calculated by PL-kNN.
+
+        Parameters
+        ----------
+        x: list of float
+            Values to evaluate the kernel at.
+        xi: list of float
+            Centers of the kernels.
+        y: list of float
+            Censoring indicators for each kernel;
+        
+        Returns
+        -------
+        list of float
+            The weights of the nearest neighbors of x
+        """
+        plnn = PlNearestNeighbors()
+        plnn.fit(x, y)
+        plnn.predict(xi)
+        nn_weights = plnn.nearest_neighbors[:,-1]
+        
+        return nn_weights
+
+    def pl_knn_kernel(self, x, xi, y):
+        """
+        PL-kNN kernel.
+
+        Parameters
+        ----------
+        x: list of float
+            Values to evaluate the kernel at.
+        xi: list of float
+            Centers of the kernels.
+        y: list of float
+            Censoring indicators for each kernel;
+        
+        Returns
+        -------
+        float
+            The sum of the weights of the nearest neighbors of x
+        """
+        nn_weights = self.get_nn_weights(x, xi, y)
+        sum = 0.0
+        for i in range(len(nn_weights)):
+            sum += nn_weights[i]
+
+        return sum
     
     def call(self, x, xi, y=None):
-        # OBS: PRECISA IMPORTAR A CLASSE DO PL-kNN
+        """
+        Call the pl-kNN kernel function for the given inputs.
+
+        Parameters
+        ----------
+        x: list of float
+            Values to evaluate the kernel at.
+        xi: list of float
+            Centers of the kernels.
+        y: list of float
+            Censoring indicators for each kernel;
         
-        # Criar um objeto da classe PL-kNN
-
-        # Treinar o PL-kNN com X e y
-
-        # Chamar o método predict do PL-kNN na variável xi
-
-        # Recuperar os vizinhos mais proximos e retornar a soma dos seus pesos
-        pass
+        Returns
+        -------
+        float
+            The sum of the weights of the nearest neighbors of x
+        """
+        return self.pl_knn_kernel(x, xi, y)
