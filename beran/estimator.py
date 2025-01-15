@@ -45,6 +45,8 @@ class BeranEstimator:
 
         weights = [self.kernel.call(target_covariate, self.covariates[j]) for j in range(n)]
 
+        print('weights: ', weights)
+
         for i in range(n):
             # Find individuals still at risk at time t_i
             at_risk = self.times >= self.times[i]

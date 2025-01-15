@@ -1,5 +1,5 @@
 from scipy.stats import norm
-from pl_nn import PlNearestNeighbors
+from .pl_nn import PlNearestNeighbors
 
 class GaussianKernel:
     def __init__(self, h):
