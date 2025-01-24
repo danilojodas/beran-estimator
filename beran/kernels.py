@@ -99,8 +99,8 @@ class PlKnnKernel:
             The weights of the nearest neighbors of x
         """
         plnn = PlNearestNeighbors()
-        plnn.fit(x, y)
-        plnn.predict(xi)
+        plnn.fit(xi, y)
+        plnn.predict(x)
         nn_weights = plnn.nearest_neighbors[:,-1]
         
         return nn_weights
