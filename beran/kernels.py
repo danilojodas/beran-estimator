@@ -101,7 +101,7 @@ class PlKnnKernel:
         plnn = PlNearestNeighbors()
         plnn.fit(xi, y)
         plnn.predict(x)
-        nn_weights = plnn.nearest_neighbors[:,-1]
+        nn_weights = plnn.nearest_neighbors[:,-2]
         
         return nn_weights
 

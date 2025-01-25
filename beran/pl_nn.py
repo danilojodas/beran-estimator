@@ -159,7 +159,11 @@ class PlNearestNeighbors:
             # Getting the weights of each sample
             w = []
             for s in X_:
-                w.append(1 / (np.linalg.norm(s-center)+0.0001))
+                if (s == center).all():
+                    w.append(0)
+                    continue
+                
+                w.append(1 / (np.linalg.norm(s-center)+0.1))
                 # try:
                 #     w.append(1 / math.sqrt((s[0]-center[0])**2 + (s[1]-center[1])**2))
                 # except:
