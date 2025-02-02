@@ -68,7 +68,7 @@ class BeranEstimator:
             weighted_sum_at_risk = np.sum(kernel_weights * at_risk)
 
             # Compute hazard for time t_i
-            hazard = kernel_weights[i] * self.censoring[i] / (weighted_sum_at_risk)
+            hazard = kernel_weights[i] * self.censoring[i] / (weighted_sum_at_risk+1e-10)
 
             # Update survival function using cumulative product
             if i == 0:
