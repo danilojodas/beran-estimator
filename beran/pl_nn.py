@@ -203,7 +203,7 @@ class PlNearestNeighbors:
             # Getting the minimum distance (test sample to the class centers)
             ed = distances_center[np.argmin(distances_center)]
             
-            # Getting the nearest neighbors, i.e., all training instances whose distances are less than the distances
+            # Getting the nearest neighbors, i.e., all training instances whose distances are less than the minimum distance
             idx_min = np.where(distances <= ed)
             nearest_neighbors = self.X_train[idx_min]
             
@@ -219,7 +219,18 @@ class PlNearestNeighbors:
             
             # Getting the neighbors inside the semi-circle
             nearest_neighbors = nearest_neighbors[np.abs(angles) <= 90]
-            self.nearest_neighbors = nearest_neighbors
+
+            # Weighted sum considering the considering the distances and weights of the training instances
+            sum = 0.0
+            for n in nearest_neighbors:
+                sum += (1/n[-1]) * n[-2]
+
+            # Normalizing the weights
+            nearest_neighbors[:,-2] = nearest_neighbors[:,-2] / sum
+
+            # Replace Nans weights with 0
+            nearest_neighbors[:,-2] = np.nan_to_num(nearest_neighbors[:,-2])
+            self.nearest_neighbors = nearest_neighbors                     
             
             # Determining the final class based on the nearest neighbors
             if (len(nearest_neighbors) == 0):
