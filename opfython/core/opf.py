@@ -13,7 +13,7 @@ from opfython.stream import loader
 from opfython.utils import logging
 
 logger = logging.get_logger(__name__)
-
+logger.disabled = True
 
 class OPF:
     """A basic class to define all common OPF-related methods.

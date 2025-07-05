@@ -77,7 +77,6 @@ def opf_accuracy(
     if n_class < 2: n_class = 2
 
     errors = np.zeros((n_class, 2))
-    print(f'n_class = {n_class}')
     
     counts = np.bincount(labels)
 

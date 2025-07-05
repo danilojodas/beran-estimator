@@ -14,7 +14,7 @@ from opfython.subgraphs import KNNSubgraph
 from opfython.utils import logging
 
 logger = logging.get_logger(__name__)
-
+logger.disabled = True
 
 class KNNSupervisedOPF(OPF):
     """A KNNSupervisedOPF which implements the supervised version of OPF classifier with a KNN subgraph.
@@ -165,7 +165,8 @@ class KNNSupervisedOPF(OPF):
         max_acc = 0.0
         max_acc = -np.inf
 
-        for k in range(1, self.max_k + 1):
+        best_k = 1
+        for k in range(1, min(self.max_k, len(X_train))):
             self.subgraph.best_k = k
 
             self.subgraph.create_arcs(

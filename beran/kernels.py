@@ -3,6 +3,10 @@ from .pl_nn import PlNearestNeighbors
 from opfython.models.knn_supervised import KNNSupervisedOPF
 from sklearn.model_selection import train_test_split
 import opfython.utils.constants as c
+from opfython.utils import logging
+
+logger = logging.get_logger(__name__)
+logger.disabled = True
 
 class GaussianKernel:
     def __init__(self, h):
@@ -161,14 +165,8 @@ class OpfKnnKernel:
         costs = []
         if len(xi) > 2:
             x_train, x_val, y_train, y_val = train_test_split(xi, y, test_size=0.25, random_state=1)
-            print(f'x_train: {x_train.shape}')
-            print(f'x_val: {x_val.shape}')
-            print(f'y_train: {y_train.shape}')
-            print(f'y_val: {y_val.shape}')
-
-            opf = KNNSupervisedOPF()
+            opf = KNNSupervisedOPF(max_k=30)
             opf.fit(x_train, y_train, x_val, y_val)
-            print('fitou')
             opf.predict(x)
             subgraph = opf.subgraph
 
@@ -177,8 +175,8 @@ class OpfKnnKernel:
                     neighbour = int(opf.neighbours_idx[k])
                     costs.append(subgraph.nodes[neighbour].cost)
 
+        print(f'get weights = {costs}')
         return costs
-
 
     def opf_knn_kernel(self, x, xi, y=None):
         opf_costs = self.get_opf_costs(x, xi, y)
@@ -193,3 +191,34 @@ class OpfKnnKernel:
     
     def call(self, x, xi, y=None):
         return self.opf_knn_kernel(x, xi, y)
+    
+class OpfKnnArcKernel:
+    def __init__(self):
+        pass
+
+    def get_arc_weights(self, x, xi, y=None):
+        weights = []
+        if len(xi) > 2:
+            x_train, x_val, y_train, y_val = train_test_split(xi, y, test_size=0.25, random_state=1)
+            opf = KNNSupervisedOPF(max_k=30)
+            opf.fit(x_train, y_train, x_val, y_val)
+            opf.predict(x)
+            for k in range(opf.subgraph.best_k):
+                if opf.distances[k] != c.FLOAT_MAX:
+                    weights.append(opf.distances[k]) 
+
+        return weights
+    
+    def opf_knn_arc_kernel(self, x, xi, y=None):
+        arc_weights = self.get_arc_weights(x, xi, y)
+        sum = 0.0
+        count = 0.00001
+
+        for weight in arc_weights:
+            sum += weight
+            count += 1
+        
+        return sum/count
+    
+    def call(self, x, xi, y=None):
+        return self.opf_knn_arc_kernel(x, xi, y)

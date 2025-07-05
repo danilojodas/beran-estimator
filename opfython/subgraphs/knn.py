@@ -42,6 +42,7 @@ class KNNSubgraph(Subgraph):
         self.density = 0.0
         self.min_density = 0.0
         self.max_density = 0.0
+        self.arc_weights = []
 
     @property
     def n_clusters(self) -> int:
@@ -152,6 +153,9 @@ class KNNSubgraph(Subgraph):
             pdf[i] = 0
             n_pdf = 1
 
+            if len(self.nodes[i].adjacency) == 0:
+                n_neighbours = 0
+            
             for k in range(n_neighbours):
                 j = int(self.nodes[i].adjacency[k])
 

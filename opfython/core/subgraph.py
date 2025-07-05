@@ -173,7 +173,6 @@ class Subgraph:
 
             self.nodes.append(node)
 
-        print(self.nodes[0].features.shape)
         self.n_features = self.nodes[0].features.shape[0]
 
     def destroy_arcs(self) -> None:
