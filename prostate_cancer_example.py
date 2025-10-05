@@ -5,6 +5,7 @@ from beran.kernels import PlKnnKernel
 from sksurv.ensemble import RandomSurvivalForest
 from lifelines import KaplanMeierFitter, CoxPHFitter
 from sklearn.preprocessing import StandardScaler
+from sklearn.compose import ColumnTransformer
 
 import numpy as np
 import pandas as pd
@@ -24,31 +25,38 @@ delta = data['Event (0=Alive , 1 =Death)'].to_numpy()
 
 X_train, X_test, delta_train, delta_test = train_test_split(data, delta, test_size=0.2, random_state=1)
 
-T_train = X_train['Time to event -Months']
-X_train = X_train.drop(columns='Time to event -Months')
-col_labels = list(X_train)
-X_train = X_train.to_numpy()
+num_cols = ["Age", "Baseline PSA","Gleason Score"]        
+ct = ColumnTransformer(
+    transformers=[("num", StandardScaler(), num_cols)],
+    remainder="passthrough"         
+)
+ct.set_output(transform="pandas")   
+ct.fit(X_train)
+X_train_z = ct.transform(X_train)
+X_test_z = ct.transform(X_test)
+print(X_train_z)
 
-T_test = X_test['Time to event -Months']
-X_test = X_test.drop(columns='Time to event -Months').to_numpy()
+T_train = X_train_z["remainder__Time to event -Months"]
+X_train_z = X_train_z.drop(columns=["remainder__Time to event -Months"])
+print(X_train_z.columns.get_loc("remainder__Event (0=Alive , 1 =Death)"))
+col_labels = list(X_train_z)
+X_train_z = X_train_z.to_numpy()
+
+T_test = X_test_z["remainder__Time to event -Months"]
+X_test_z = X_test_z.drop(columns=["remainder__Time to event -Months"]).to_numpy()
 
 # Sort the time and the data
 T_train = np.sort(T_train)
 T_test = np.sort(T_test)
-X_train = X_train[np.argsort(T_train)]
-X_test = X_test[np.argsort(T_test)]
+X_train_z = X_train_z[np.argsort(T_train)]
+X_test_z = X_test_z[np.argsort(T_test)]
 
 # Gets the delta and covariates
-delta_train = X_train[:,-1].astype(int)
-X_train = X_train[:,:-1]
+delta_train = X_train_z[:,-1].astype(int)
+X_train_z = X_train_z[:,:-1]
 
-delta_test = X_test[:,-1].astype(int)
-X_test = X_test[:,:-1]
-
-scaler = StandardScaler()
-scaler.fit(X_train)  
-X_train_z = scaler.transform(X_train)
-X_test_z  = scaler.transform(X_test)
+delta_test = X_test_z[:,-1].astype(int)
+X_test_z = X_test_z[:,:-1]
 
 cph_data = pd.DataFrame(X_train_z)
 cph_data['Time to event -Months'] = T_train

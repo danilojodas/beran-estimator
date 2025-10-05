@@ -4,7 +4,6 @@ from beran.kernels import OpfKnnKernel, OpfKnnArcKernel
 from beran.kernels import PlKnnKernel
 from sksurv.ensemble import RandomSurvivalForest
 from lifelines import KaplanMeierFitter, CoxPHFitter
-from sklearn.preprocessing import StandardScaler
 
 
 import numpy as np
@@ -13,6 +12,8 @@ import matplotlib.pyplot as plt
 import os
 import random
 from sklearn.model_selection import RandomizedSearchCV, train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.compose import ColumnTransformer
 import logging
 
 logging.disable(logging.INFO)
@@ -22,32 +23,41 @@ data = pd.read_csv('./data/S1Data.csv')
 delta = data['Event'].to_numpy()
 X_train, X_test, delta_train, delta_test = train_test_split(data, delta, test_size=0.2, random_state=1)
 
-T_train = X_train['TIME']
-X_train = X_train.drop(columns='TIME')
-col_labels = list(X_train)
-X_train = X_train.to_numpy()
+num_cols = ["Age","Ejection.Fraction","Sodium","Creatinine","Pletelets","CPK"]        
+ct = ColumnTransformer(
+    transformers=[("num", StandardScaler(), num_cols)],
+    remainder="passthrough"         
+)
+ct.set_output(transform="pandas")   
+ct.fit(X_train)
+X_train_z = ct.transform(X_train)
+X_test_z = ct.transform(X_test)
 
-T_test = X_test['TIME']
-X_test = X_test.drop(columns='TIME').to_numpy()
+print(X_test_z['remainder__TIME'])
+
+
+T_train = X_train_z['remainder__TIME']
+X_train_z = X_train_z.drop(columns=["remainder__TIME"])
+print(X_train_z.columns.get_loc("remainder__Event"))
+col_labels = list(X_train_z)
+X_train_z = X_train_z.to_numpy()
+
+T_test = X_test_z['remainder__TIME']
+X_test_z = X_test_z.drop(columns=["remainder__TIME"])
+X_test_z = X_test_z.to_numpy()
 
 # Sort the time and the data
 T_train = np.sort(T_train)
 T_test = np.sort(T_test)
-X_train = X_train[np.argsort(T_train)]
-X_test = X_test[np.argsort(T_test)]
+X_train_z = X_train_z[np.argsort(T_train)]
+X_test_z = X_test_z[np.argsort(T_test)]
 
 # Gets the delta and covariates
-delta_train = X_train[:,1].astype(int)
-print(delta_train)
-X_train = np.delete(X_train, 1, axis=1)
+delta_train = X_train_z[:,6].astype(int)
+X_train_z = np.delete(X_train_z, 6, axis=1)
 
-delta_test = X_test[:,1].astype(int)
-X_test = np.delete(X_test, 1, axis=1)
-
-scaler = StandardScaler()
-scaler.fit(X_train)  
-X_train_z = scaler.transform(X_train)
-X_test_z  = scaler.transform(X_test)
+delta_test = X_test_z[:,6].astype(int)
+X_test_z = np.delete(X_test_z, 6, axis=1)
 
 cph_data = pd.DataFrame(X_train_z)
 cph_data['TIME'] = T_train
