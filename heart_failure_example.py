@@ -94,8 +94,8 @@ X_test_z = np.delete(X_test_z, 6, axis=1)
 opf_kernel = OpfKnnKernel()
 opf_estimator = BeranEstimator(T_train, X_train_z, delta_train, opf_kernel)
 
-opf_arc_kernel = OpfKnnArcKernel()
-opf_arc_estimator = BeranEstimator(T_train, X_train_z, delta_train, opf_arc_kernel)
+# opf_arc_kernel = OpfKnnArcKernel()
+# opf_arc_estimator = BeranEstimator(T_train, X_train_z, delta_train, opf_arc_kernel)
 
 # pl_knn_kernel = PlKnnKernel()
 # pl_knn_estimator = BeranEstimator(T_train, X_train_z, delta_train, pl_knn_kernel)
@@ -116,9 +116,9 @@ opf_results_folder = 'test/results/heart_failure/opf_results'
 if (not os.path.exists(opf_results_folder)):
     os.makedirs(opf_results_folder)
 
-opf_arc_results_folder = 'test/results/heart_failure/opf_arc_results'
-if (not os.path.exists(opf_arc_results_folder)):
-    os.makedirs(opf_arc_results_folder)
+# opf_arc_results_folder = 'test/results/heart_failure/opf_arc_results'
+# if (not os.path.exists(opf_arc_results_folder)):
+#     os.makedirs(opf_arc_results_folder)
 
 # pl_knn_results_folder = 'test/results/heart_failure/pl_knn_results'
 # if (not os.path.exists(pl_knn_results_folder)):
@@ -126,7 +126,7 @@ if (not os.path.exists(opf_arc_results_folder)):
 
 # rsf_results = []
 opf_results = []
-opf_arc_results = []
+# opf_arc_results = []
 # pl_knn_results = []
 # cph_results = []
 
@@ -145,8 +145,8 @@ for x_predict in X_test_z:
     opf_survival_function = opf_estimator.estimate_sf(x_predict)
     opf_results.append(opf_survival_function)
 
-    opf_arc_sf = opf_arc_estimator.estimate_sf(x_predict)
-    opf_arc_results.append(opf_arc_sf)
+    # opf_arc_sf = opf_arc_estimator.estimate_sf(x_predict)
+    # opf_arc_results.append(opf_arc_sf)
 
     # pl_knn_sf = pl_knn_estimator.estimate_sf(x_predict)
     # pl_knn_results.append(pl_knn_sf)
@@ -165,8 +165,8 @@ for x_predict in X_test_z:
 opf_results = np.vstack([T_train, opf_results])
 np.savetxt('{}/sf_test.csv'.format(opf_results_folder), opf_results, delimiter=',')
 
-opf_arc_results = np.vstack([T_train, opf_arc_results])
-np.savetxt('{}/sf_test.csv'.format(opf_arc_results_folder), opf_arc_results, delimiter=',')
+# opf_arc_results = np.vstack([T_train, opf_arc_results])
+# np.savetxt('{}/sf_test.csv'.format(opf_arc_results_folder), opf_arc_results, delimiter=',')
 
 # pl_knn_results = np.vstack([T_train, pl_knn_results])
 # np.savetxt('{}/sf_test.csv'.format(pl_knn_results_folder), pl_knn_results, delimiter=',')
