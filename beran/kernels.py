@@ -165,7 +165,7 @@ class OpfKnnKernel:
         costs = []
         if len(xi) > 2:
             x_train, x_val, y_train, y_val = train_test_split(xi, y, test_size=0.25, random_state=1)
-            opf = KNNSupervisedOPF(max_k=30)
+            opf = KNNSupervisedOPF(max_k=15)
             opf.fit(x_train, y_train, x_val, y_val)
             opf.predict(x)
             subgraph = opf.subgraph
@@ -175,7 +175,7 @@ class OpfKnnKernel:
                     neighbour = int(opf.neighbours_idx[k])
                     costs.append(subgraph.nodes[neighbour].cost)
 
-        print(f'get weights = {costs}')
+        # print(f'get weights = {costs}')
         return costs
 
     def opf_knn_kernel(self, x, xi, y=None):
@@ -200,7 +200,7 @@ class OpfKnnArcKernel:
         weights = []
         if len(xi) > 2:
             x_train, x_val, y_train, y_val = train_test_split(xi, y, test_size=0.25, random_state=1)
-            opf = KNNSupervisedOPF(max_k=30)
+            opf = KNNSupervisedOPF(max_k=15)
             opf.fit(x_train, y_train, x_val, y_val)
             opf.predict(x)
             for k in range(opf.subgraph.best_k):

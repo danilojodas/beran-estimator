@@ -14,7 +14,7 @@
 # test = pd.read_csv("test/DHSV_LDA_OEM_test.csv")
 
 # # Name of the delta and time columns as list
-# cols = ['delta', 'time']
+# cols = ['delta', 'Time to event -Months']
 
 # # Get the events as boolean
 # event = np.where(test['delta'] == 1, True, False)
@@ -43,7 +43,7 @@
 #     risk_scores = risk_scores[:,100]
 
 #     # Evaluation time
-#     eval_time = np.linspace(test['time'].min(), test['time'].max() - 1e-10, test['time'].shape[0])
+#     eval_time = np.linspace(test['Time to event -Months'].min(), test['Time to event -Months'].max() - 1e-10, test['Time to event -Months'].shape[0])
 #     surv = np.array([np.interp(eval_time, times, sf[i,:]) for i in range(len(sf))])
 
 #     print('eval_time: ', eval_time.astype(int))
@@ -67,20 +67,22 @@ from sksurv.metrics import integrated_brier_score, concordance_index_censored, c
 from sksurv.datasets.base import get_x_y
 
 folders = {'Cox PHM':'cox_results', 'Beran PL-kNN':'pl_knn_results', 'RSF':'rsf_results', 'Beran OPF-kNN':'opf_results', 'Beran OPF-kNN (Arc weights)': 'opf_arc_results',
-           'Benk N=1/n=28':'benk_1_28', 'Benk N=9/n=69':'benk_9_69', 'Benk N=10/n=49':'benk_10_49',
-           'Benk N=13/n=55':'benk_13_55', 'Benk N=14/n=85':'benk_14_85', 'Benk N=20/n=9':'benk_20_9',
-           'Benk N=25/n=65': 'benk_25_65', 'Benk N=26/n=30':'benk_26_30', 'Benk N=35/n=54':'benk_35_54',
-           'Benk N=39/n=74':'benk_39_74'}
+           'Benk N=1/n=28':'benk_1_28_results', 'Benk N=9/n=69':'benk_9_69_results', 'Benk N=10/n=49':'benk_10_49_results',
+           'Benk N=13/n=55':'benk_13_55_results', 'Benk N=14/n=85':'benk_14_85_results', 'Benk N=20/n=9':'benk_20_9_results',
+           'Benk N=25/n=65': 'benk_25_65_results', 'Benk N=26/n=30':'benk_26_30_results', 'Benk N=35/n=54':'benk_35_54_results',
+           'Benk N=39/n=74':'benk_39_74_results'}
 
 # Train and test data
-train = pd.read_csv("test/DHSV_LDA_OEM_train.csv")
-test = pd.read_csv("test/DHSV_LDA_OEM_test.csv")
+train = pd.read_csv("test/prostate_cancer_train.csv")
+test = pd.read_csv("test/prostate_cancer_test.csv")
+
+print(train)
 
 # Name of the delta and time columns as list
-cols = ['delta', 'time']
+cols = ['Event (0=Alive , 1 =Death)', 'Time to event -Months']
 
 # Get the events as boolean
-event = test['delta'].values == 1  # Boolean array
+event = test['Event (0=Alive , 1 =Death)'].values == 1  # Boolean array
 
 # Get the structured array
 x_train, y_train = get_x_y(train, attr_labels=cols, pos_label=1, survival=True)
@@ -91,7 +93,7 @@ metrics = []
 
 for estimator,folder in folders.items():
     # Read estimations
-    data = pd.read_csv(f"test/results3/{folder}/sf_test.csv", header=None)
+    data = pd.read_csv(f"test/results/prostate_cancer/{folder}/sf_test.csv", header=None)
 
     # Read times
     times = data.iloc[0, :].values.astype(float)  # Ensure it's float
@@ -100,13 +102,13 @@ for estimator,folder in folders.items():
     sf = data.iloc[1:, :].values    
 
     # Choose a meaningful evaluation time (e.g., median event time)
-    t_star = np.median(test['time'])
+    t_star = np.median(test['Time to event -Months'])
 
     # Compute risk scores using survival probability at t_star
     risk_scores = np.array([-np.log(np.interp(t_star, times, sf[i, :])) for i in range(len(sf))])
 
     # Use actual event times from test set
-    eval_time = np.linspace(test['time'].min(), test['time'].max() - 1e-10, test['time'].shape[0])
+    eval_time = np.linspace(test['Time to event -Months'].min(), test['Time to event -Months'].max() - 1e-10, test['Time to event -Months'].shape[0])
 
     # Interpolate survival function at actual test times
     surv = np.array([np.interp(eval_time, times, sf[i, :]) for i in range(len(sf))])
@@ -124,4 +126,4 @@ for estimator,folder in folders.items():
 
 # Save metrics to a CSV file
 df = pd.DataFrame(metrics, columns=['Estimator', 'IBS', 'C-index', 'C-index IPCW'], index=None)
-df.to_csv('test/results3/metrics_2.csv', index=False,float_format='%.3f')
+df.to_csv('test/results/prostate_cancer/metrics_2.csv', index=False,float_format='%.3f')
