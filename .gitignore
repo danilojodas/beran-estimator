@@ -165,3 +165,14 @@ cython_debug/
 *.jpg
 *.png
 test/
+
+# Example/experiment scripts and generated artifacts
+example_dhsv.py
+generate_benk_dhsv_plots.py
+generate_benk_hf_plots.py
+generate_benk_pc_plots.py
+heart_failure_example.py
+plots.zip
+predictive_maintenance_example.py
+prostate_cancer_example.py
+t_knn.py

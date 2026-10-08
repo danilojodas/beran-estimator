@@ -1,3 +1,4 @@
+--extra-index-url https://download.pytorch.org/whl/cu118
 aquarel==0.0.7
 astroid==4.0.2
 autograd==1.7.0
